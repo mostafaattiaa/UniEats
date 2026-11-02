@@ -8,10 +8,10 @@ A multi-university food ordering and scheduled pickup app. Students choose their
 
 | | |
 |---|---|
-| ▶️ **Web presentation** | [index.html](index.html) (download the repo and open it in a browser) |
+| ▶️ **Live presentation (web)** | https://unieats-six.vercel.app |
 | 📊 **PowerPoint** | [UniEats_Week6.pptx](UniEats_Week6.pptx) |
 
-The web presentation runs in any browser. Use the **spoon** button (or →) for the next slide, the **fork** button (or ←) to go back, and **F** for full screen. The PowerPoint has the same 14 slides, with speaker notes on each one.
+The live presentation runs in any browser. Use the **spoon** button (or →) for the next slide, the **fork** button (or ←) to go back, and **F** for full screen. The PowerPoint has the same 14 slides, with speaker notes on each one.
 
 ## Contents
 
