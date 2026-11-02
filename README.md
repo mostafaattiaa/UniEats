@@ -4,16 +4,24 @@ A multi-university food ordering and scheduled pickup app. Students choose their
 
 **Phase 1 presentation:** Computers in Practice / Creative and Technological Industries project, Mobile Programming.
 
-## Presentation
+## Presentations
 
-| | |
-|---|---|
-| ▶️ **Live presentation (web)** | https://unieats-six.vercel.app |
-| 📊 **PowerPoint** | [UniEats_Week6.pptx](UniEats_Week6.pptx) |
+| | Web (live) | PowerPoint |
+|---|---|---|
+| **Phase 1 team presentation** (7 slides) | https://unieats-six.vercel.app/phase1.html | [UniEats_Phase1.pptx](UniEats_Phase1.pptx) |
+| **Week 6 project proposal** (14 slides) | https://unieats-six.vercel.app | [UniEats_Week6.pptx](UniEats_Week6.pptx) |
 
-The live presentation runs in any browser. Use the **spoon** button (or →) for the next slide, the **fork** button (or ←) to go back, and **F** for full screen. The PowerPoint has the same 14 slides, with speaker notes on each one.
+The web presentations run in any browser. Use the **spoon** button (or →) for the next slide, the **fork** button (or ←) to go back, and **F** for full screen. Each PowerPoint has the same slides as its web version, with speaker notes on every slide.
 
-## Contents
+## Phase 1 contents
+
+1. Customer and problem
+2. 3 app ideas considered, and why we chose Uni Eats
+3. App design idea
+4. How the app works
+5. Must-have and nice-to-have features
+
+## Week 6 proposal contents
 
 1. The problem: short breaks, long queues
 2. The solution: order ahead, pick a pickup time
