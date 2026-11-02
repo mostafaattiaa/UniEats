@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UniEats Week 6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #150E0A;
+    --bg-2: #211610;
+    --card: rgba(255, 238, 220, .055);
+    --line: rgba(255, 214, 180, .14);
+    --orange: #FF6B2C;
+    --orange-2: #FF9A3C;
+    --mustard: #FFC845;
+    --tomato: #FF4D3D;
+    --mint: #4FD1A5;
+    --cream: #FFF3E6;
+    --muted: #BFA796;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #0B0705;
+    color: var(--cream);
+    font: 400 24px/1.45 "DM Sans", system-ui, sans-serif;
+    overflow: hidden;
+  }
+
+  /* fixed 16:9 stage, scaled to fit the window by JS */
+  #stage {
+    width: 1600px; height: 900px;
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg);
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, .6);
+  }
+  .blob {
+    position: absolute; width: 760px; height: 760px; border-radius: 50%;
+    filter: blur(90px); opacity: .32; pointer-events: none;
+    transition: left 1.2s cubic-bezier(.6, 0, .2, 1), top 1.2s cubic-bezier(.6, 0, .2, 1);
+  }
+  .blob.a { background: radial-gradient(circle, var(--orange), transparent 65%); }
+  .blob.b { background: radial-gradient(circle, var(--mustard), transparent 65%); opacity: .18; }
+  /* film grain */
+  #stage::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .07; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .topbar {
+    position: absolute; inset: 34px 90px auto; display: flex; justify-content: space-between; z-index: 3;
+    font: 600 16px "DM Sans"; letter-spacing: .22em; text-transform: uppercase; color: var(--muted);
+  }
+  .topbar b { color: var(--orange); }
+  .progress { position: absolute; left: 0; top: 0; height: 5px; z-index: 4;
+    background: linear-gradient(90deg, var(--orange), var(--mustard)); transition: width .6s ease; }
+
+  .slide {
+    position: absolute; inset: 0;
+    padding: 96px 90px 130px;
+    display: flex; flex-direction: column; justify-content: center;
+    opacity: 0; visibility: hidden; transition: opacity .45s ease, visibility .45s;
+  }
+  .slide.active { opacity: 1; visibility: visible; }
+
+  /* staggered entrance; --i is set per element by JS */
+  .rise { opacity: 0; transform: translateY(28px); }
+  .slide.active .rise { animation: rise .75s cubic-bezier(.2, .8, .2, 1) forwards; animation-delay: calc(var(--i, 0) * 90ms + 120ms); }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  h1, h2, h3 { font-family: "Bricolage Grotesque", sans-serif; line-height: .98; letter-spacing: -.02em; }
+  h2 { font-size: 80px; font-weight: 800; margin-bottom: 34px; }
+  h3 { font-size: 30px; font-weight: 700; margin-bottom: 8px; letter-spacing: -.01em; }
+  .hl { background: linear-gradient(90deg, var(--orange), var(--mustard)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 12px; margin-bottom: 18px;
+    font: 700 17px "DM Sans"; letter-spacing: .2em; text-transform: uppercase; color: var(--orange-2);
+  }
+  .eyebrow::before { content: ""; width: 34px; height: 3px; border-radius: 3px; background: var(--orange); }
+  .muted { color: var(--muted); }
+  .grid { display: grid; gap: 24px; }
+  .row { display: flex; gap: 60px; align-items: center; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 26px; padding: 28px 30px;
+    backdrop-filter: blur(6px);
+  }
+  .card p { color: var(--muted); font-size: 21px; line-height: 1.4; }
+  .icon {
+    width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; font-size: 34px; margin-bottom: 18px;
+    background: linear-gradient(135deg, rgba(255, 107, 44, .25), rgba(255, 200, 69, .12)); border: 1px solid rgba(255, 154, 60, .3);
+  }
+  .quote {
+    font: 600 34px/1.25 "Bricolage Grotesque"; letter-spacing: -.01em;
+    padding: 30px 36px; border-radius: 26px; border-left: 8px solid var(--orange);
+    background: linear-gradient(90deg, rgba(255, 107, 44, .14), transparent);
+  }
+
+  /* ---------- cover ---------- */
+  .cover { flex-direction: row; align-items: center; gap: 40px; }
+  .cover h1 { font-size: 190px; font-weight: 800; letter-spacing: -.045em; line-height: .85; }
+  .cover .tag { font: 700 46px "Bricolage Grotesque"; margin: 18px 0 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip { padding: 8px 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); font-size: 18px; color: var(--cream); }
+  .plate { position: relative; width: 560px; height: 560px; flex: none; display: grid; place-items: center; }
+  .plate .ring { position: absolute; inset: 0; border-radius: 50%; border: 2px dashed rgba(255, 154, 60, .35); animation: spin 40s linear infinite; }
+  .plate .ring.in { inset: 60px; border-style: solid; border-color: rgba(255, 154, 60, .12); background: radial-gradient(circle, rgba(255,107,44,.18), transparent 70%); }
+  .plate svg { width: 300px; height: 300px; filter: drop-shadow(0 30px 60px rgba(255, 107, 44, .55)); animation: float 5s ease-in-out infinite; }
+  .orbit { position: absolute; inset: 0; animation: spin 36s linear infinite; }
+  .orbit span { position: absolute; font-size: 62px; animation: spin 36s linear infinite reverse; }
+  .orbit span:nth-child(1) { left: 245px; top: -30px; }
+  .orbit span:nth-child(2) { right: -30px; top: 245px; }
+  .orbit span:nth-child(3) { left: 245px; bottom: -30px; }
+  .orbit span:nth-child(4) { left: -30px; top: 245px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes float { 50% { transform: translateY(-16px) rotate(-3deg); } }
+
+  /* ---------- problem ---------- */
+  .pain { display: flex; gap: 22px; align-items: center; padding: 22px 26px; }
+  .pain .n { font: 800 50px "Bricolage Grotesque"; color: var(--orange); width: 64px; flex: none; }
+  .pain b { font-size: 25px; display: block; }
+  .pain span { color: var(--muted); font-size: 20px; }
+  .photo { width: 640px; flex: none; border-radius: 28px; transform: rotate(2deg);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .5), 0 0 0 10px rgba(255, 243, 230, .06); }
+
+  /* ---------- ideas ---------- */
+  .idea { position: relative; }
+  .idea.win { border: 2px solid var(--orange); background: linear-gradient(160deg, rgba(255, 107, 44, .2), rgba(255, 238, 220, .04));
+    box-shadow: 0 0 60px rgba(255, 107, 44, .25); }
+  .badge { position: absolute; top: -16px; right: 24px; padding: 6px 16px; border-radius: 999px;
+    font: 800 15px "DM Sans"; letter-spacing: .14em; color: #1A0F08; background: linear-gradient(90deg, var(--orange), var(--mustard)); }
+  .idea .verdict { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 18px; }
+  .check { display: flex; gap: 14px; align-items: flex-start; font-size: 21px; }
+  .check::before { content: "✓"; flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+    background: rgba(79, 209, 165, .16); color: var(--mint); font-weight: 800; font-size: 18px; }
+
+  /* ---------- operating model ---------- */
+  .flow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; }
+  .flow span { padding: 8px 15px; border-radius: 14px; background: rgba(255, 243, 230, .07); font-size: 18px; }
+  .flow i { color: var(--orange); font-style: normal; }
+  .warn { display: flex; gap: 22px; align-items: center; border-color: rgba(255, 200, 69, .4); background: rgba(255, 200, 69, .08); }
+
+  /* ---------- features ---------- */
+  .feat h3 { font-size: 24px; }
+  .feat p { font-size: 17px; }
+  .feat .icon { width: 54px; height: 54px; font-size: 28px; margin-bottom: 14px; }
+  .pill { display: flex; align-items: center; gap: 14px; padding: 16px 22px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); font-size: 21px; }
+  .pill em { font-style: normal; font-size: 28px; }
+
+  /* ---------- phones ---------- */
+  .phones { display: flex; justify-content: center; gap: 36px; }
+  .ph { text-align: center; }
+  .ph:nth-child(even) .phone { margin-top: 30px; }
+  .phone {
+    width: 240px; height: 480px; border-radius: 40px; padding: 9px; background: #080504;
+    border: 2px solid #3B2A1F; box-shadow: 0 30px 60px rgba(0, 0, 0, .55), 0 0 40px rgba(255, 107, 44, .12);
+  }
+  .scr { position: relative; height: 100%; border-radius: 32px; overflow: hidden; background: #FFF8F0; color: #22150D;
+    font-size: 11px; line-height: 1.35; text-align: left; padding: 34px 14px 14px; }
+  .scr::before { content: ""; position: absolute; top: 9px; left: 50%; width: 70px; height: 18px; margin-left: -35px; border-radius: 10px; background: #080504; }
+  .scr h4 { font: 800 17px/1.1 "Bricolage Grotesque"; margin-bottom: 8px; }
+  .scr .sub { color: #8A7465; font-size: 10px; margin-bottom: 10px; }
+  .fld { border: 1px solid #EADBCF; background: #fff; border-radius: 10px; padding: 9px 10px; margin-bottom: 8px; color: #A8968A; }
+  .btn { position: absolute; left: 14px; right: 14px; bottom: 16px; padding: 11px; border-radius: 12px; text-align: center; font-weight: 700; color: #fff; background: var(--orange); }
+  .btn.go { background: #1E9E72; }
+  .item { display: flex; align-items: center; gap: 8px; border: 1px solid #EFE2D6; background: #fff; border-radius: 12px; padding: 8px; margin-bottom: 7px; }
+  .item .em { width: 32px; height: 32px; border-radius: 10px; background: #FFE9DA; display: grid; place-items: center; font-size: 17px; flex: none; }
+  .item b { display: block; font-size: 11.5px; }
+  .item small { color: #8A7465; font-size: 9.5px; }
+  .item .add { margin-left: auto; width: 22px; height: 22px; border-radius: 50%; background: var(--orange); color: #fff; display: grid; place-items: center; font-weight: 800; flex: none; }
+  .item.sel { border-color: var(--orange); background: #FFF1E7; }
+  .item.full { opacity: .45; }
+  .item.full .add, .item .tick { background: none; color: var(--orange); }
+  .hero { margin: -34px -14px 12px; padding: 44px 14px 18px; background: linear-gradient(150deg, var(--orange), var(--orange-2)); color: #fff; }
+  .hero .u { width: 46px; height: 46px; border-radius: 14px; background: #fff; display: grid; place-items: center; margin-bottom: 12px; }
+  .tabs { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around; padding: 10px 0 14px; border-top: 1px solid #EFE2D6; background: #fff; font-size: 9.5px; color: #8A7465; }
+  .tabs b { color: var(--orange); }
+  .mini { display: flex; gap: 5px; margin-bottom: 9px; }
+  .mini span { padding: 4px 9px; border-radius: 99px; background: #F3E6DB; font-size: 9.5px; }
+  .mini span:first-child { background: var(--orange); color: #fff; }
+  .ph .cap { margin-top: 18px; font-size: 18px; color: var(--muted); }
+  .ph .cap b { display: block; color: var(--cream); font-size: 20px; }
+
+  /* ---------- journey ---------- */
+  .track { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); gap: 18px; }
+  .track::before { content: ""; position: absolute; left: 6%; right: 6%; top: 33px; height: 3px;
+    background: linear-gradient(90deg, var(--orange), var(--mustard)); opacity: .55; }
+  .stop { position: relative; text-align: center; }
+  .stop .dot { width: 68px; height: 68px; margin: 0 auto 16px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 30px; background: var(--bg-2); border: 3px solid var(--orange); box-shadow: 0 0 30px rgba(255, 107, 44, .35); }
+  .stop b { display: block; font: 700 23px/1.1 "Bricolage Grotesque"; margin-bottom: 8px; }
+  .stop span { color: var(--muted); font-size: 16px; line-height: 1.35; display: block; }
+  .navflow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 18px; }
+  .navflow span { padding: 7px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); }
+  .navflow i { color: var(--orange); font-style: normal; }
+
+  /* ---------- plan ---------- */
+  .stage-n { font: 800 64px/1 "Bricolage Grotesque"; color: transparent; -webkit-text-stroke: 2px var(--orange); margin-bottom: 10px; }
+
+  /* ---------- risks ---------- */
+  .risk { display: grid; grid-template-columns: 1fr 70px 1.25fr; align-items: center; }
+  .risk > div { padding: 18px 24px; border-radius: 18px; font-size: 21px; }
+  .risk .r { background: rgba(255, 77, 61, .1); border: 1px solid rgba(255, 77, 61, .3); }
+  .risk .r::before { content: "⚠  "; }
+  .risk .s { background: rgba(79, 209, 165, .08); border: 1px solid rgba(79, 209, 165, .28); color: #DDF7EC; }
+  .risk .arrow { text-align: center; color: var(--orange); font-size: 30px; background: none; padding: 0; }
+
+  /* ---------- placeholders the team must fill ---------- */
+  .todo { color: var(--mustard); font-style: italic; border-bottom: 1px dashed var(--mustard); }
+  dl.ev { display: grid; grid-template-columns: 220px 1fr; gap: 12px 18px; font-size: 19px; }
+  dl.ev dt { color: var(--muted); }
+
+  /* ---------- nav: spoon = next, reversed fork = back ---------- */
+  nav { position: absolute; right: 90px; bottom: 38px; z-index: 5; display: flex; align-items: center; gap: 16px; }
+  .counter { font: 700 20px "Bricolage Grotesque"; color: var(--muted); min-width: 80px; text-align: center; }
+  .counter b { color: var(--cream); }
+  nav button {
+    width: 136px; height: 60px; border-radius: 999px; border: 0; cursor: pointer; color: #1A0F08;
+    background: linear-gradient(135deg, var(--orange), var(--orange-2));
+    display: grid; place-items: center;
+    box-shadow: 0 10px 30px rgba(255, 107, 44, .45), inset 0 -4px 0 rgba(0, 0, 0, .18);
+    transition: transform .15s, box-shadow .2s, opacity .2s;
+  }
+  nav button#prev { background: var(--bg-2); color: var(--orange-2); border: 1px solid rgba(255, 154, 60, .45); box-shadow: none; }
+  nav button svg { width: 100px; height: 34px; transition: transform .25s; }
+  nav button:hover:not(:disabled) { transform: translateY(-3px); }
+  nav button:hover:not(:disabled) .spoon { transform: translateX(8px) rotate(-8deg); }
+  nav button:hover:not(:disabled) .fork { transform: translateX(-8px); }
+  nav button:active:not(:disabled) { transform: translateY(2px); }
+  nav button:disabled { opacity: .3; cursor: default; }
+  nav button:focus-visible { outline: 3px solid var(--mustard); outline-offset: 4px; }
+  .hint { position: absolute; left: 90px; bottom: 54px; z-index: 5; font-size: 15px; color: rgba(191, 167, 150, .6); letter-spacing: .06em; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="progress" id="progress"></div>
+  <div class="topbar"><span><b>UniEats</b> · Week 6 Project</span><span id="section"></span></div>
+
+  <!-- 1. Cover -->
+  <section class="slide cover" data-title="Mobile Programming">
+    <div style="flex:1">
+      <div class="eyebrow rise">Week 6 Project · Mobile Programming</div>
+      <h1 class="rise"><span class="hl">UNI</span>EATS</h1>
+      <p class="tag rise">Skip the queue. Enjoy your break.</p>
+      <p class="muted rise" style="font-size:24px; margin-bottom:34px">A multi-university food ordering and scheduled pickup platform.</p>
+      <div class="chips rise">
+        <span class="chip">Rital Edam</span><span class="chip">Esraa Ahmed</span><span class="chip">Abdelrahman Dahiss</span>
+        <span class="chip">Hamza Kandil</span><span class="chip">Begad Ahmed</span><span class="chip">Mustafa Attia</span>
+      </div>
+    </div>
+    <div class="plate rise">
+      <div class="ring"></div>
+      <div class="ring in"></div>
+      <div class="orbit" aria-hidden="true"><span>🍔</span><span>🥤</span><span>🍕</span><span>🥪</span></div>
+      <svg viewBox="0 0 600 600" role="img" aria-label="UniEats logo">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A3C"/><stop offset="1" stop-color="#FF5A1F"/></linearGradient></defs>
+        <rect width="600" height="600" rx="140" fill="url(#lg)"/>
+        <path d="M200 170 V330 a100 100 0 0 0 200 0 V170" fill="none" stroke="#fff" stroke-width="66" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 2. Problem -->
+  <section class="slide" data-title="The problem">
+    <div class="row">
+      <div style="flex:1">
+        <div class="eyebrow rise">The problem</div>
+        <h2 class="rise">Short breaks.<br><span class="hl">Long queues.</span></h2>
+        <div class="grid">
+          <div class="card pain rise"><div class="n">01</div><div><b>Short breaks between lectures</b><span>Students only have a few minutes to grab food.</span></div></div>
+          <div class="card pain rise"><div class="n">02</div><div><b>Queues eat the break</b><span>At busy times, waiting takes most of that free time.</span></div></div>
+          <div class="card pain rise"><div class="n">03</div><div><b>Late to class, or no food at all</b><span>Students arrive late or skip buying food entirely.</span></div></div>
+        </div>
+      </div>
+      <img class="photo rise" src="images/problem.jpg" alt="Students waiting in a long campus food line, then ordering on UniEats and picking up their food">
+    </div>
+  </section>
+
+  <!-- 3. Solution -->
+  <section class="slide" data-title="The solution">
+    <div class="eyebrow rise">The solution</div>
+    <h2 class="rise">Order ahead. <span class="hl">Pick your time.</span><br>Grab &amp; go.</h2>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr); margin-bottom:30px">
+      <div class="card rise"><div class="icon">📱</div><h3>Order before you arrive</h3><p>Browse your campus outlets and place your order from anywhere.</p></div>
+      <div class="card rise"><div class="icon">🕒</div><h3>Schedule your pickup</h3><p>Choose an available time slot that fits between your lectures.</p></div>
+      <div class="card rise"><div class="icon">🛍️</div><h3>Collect, no queue</h3><p>Walk in at your time, grab your food and get back to class.</p></div>
+    </div>
+    <div class="grid" style="grid-template-columns:1.5fr 1fr">
+      <div class="quote rise">“Order ahead, choose your pickup time and collect your food without spending your break in a queue.”</div>
+      <div class="card rise" style="display:flex; gap:18px; align-items:center"><div class="icon" style="margin:0; flex:none">🎓</div><p><b style="color:var(--cream)">One app, many campuses.</b> Pick a university and see only its restaurants and menus.</p></div>
+    </div>
+  </section>
+
+  <!-- 4. Customer discovery -->
+  <section class="slide" data-title="Customer discovery">
+    <div class="eyebrow rise">Customer discovery</div>
+    <h2 class="rise">Who we're <span class="hl">building for</span></h2>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr); margin-bottom:34px">
+      <div class="card rise"><div class="icon">🎒</div><h3>Primary customers</h3><p>University students, especially those with limited time between lectures.</p></div>
+      <div class="card rise"><div class="icon">👩‍🍳</div><h3>Secondary users</h3><p>Campus cafeterias, cafés and restaurant staff who receive and prepare orders.</p></div>
+      <div class="card rise"><div class="icon">🏫</div><h3>Context</h3><p>University campuses with food outlets and predictable busy periods.</p></div>
+    </div>
+    <div class="quote rise"><span class="eyebrow" style="font-size:15px; margin-bottom:10px; display:flex">Problem statement</span>Students need a faster and more predictable way to buy food on campus, because long queues make them late for lectures and cut the time they have to eat and rest.</div>
+  </section>
+
+  <!-- 5. Interviews -->
+  <section class="slide" data-title="Interviews">
+    <div class="eyebrow rise">Customer interviews</div>
+    <h2 class="rise">Talking to <span class="hl">real students</span></h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr; gap:40px; align-items:start">
+      <div class="grid" style="gap:12px">
+        <div class="pill rise"><em>❓</em>How often do you buy food on campus between lectures?</div>
+        <div class="pill rise"><em>⏳</em>How long do you usually wait during busy periods?</div>
+        <div class="pill rise"><em>🏃</em>Have you been late, or skipped food, because of the queue?</div>
+        <div class="pill rise"><em>📱</em>Would you use an app to order ahead and pick a time? Why?</div>
+        <div class="pill rise"><em>🤝</em>What would make you trust the pickup time shown in the app?</div>
+      </div>
+      <!-- TODO(team): replace every yellow placeholder with your real interview before presenting -->
+      <div class="card rise">
+        <h3 style="margin-bottom:20px">🎤 Interview evidence</h3>
+        <dl class="ev">
+          <dt>Customer</dt><dd class="todo">Student A (name withheld with permission)</dd>
+          <dt>University &amp; year</dt><dd class="todo">Add university and year</dd>
+          <dt>Date &amp; method</dt><dd class="todo">Date · in person / phone / online</dd>
+          <dt>Main issue</dt><dd class="todo">Their own experience with queues</dd>
+          <dt>Impact</dt><dd class="todo">Late to lectures, skipped meals…</dd>
+          <dt>Reaction to UniEats</dt><dd class="todo">Their opinion on ordering ahead</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Ideas -->
+  <section class="slide" data-title="App ideas">
+    <div class="eyebrow rise">App ideas &amp; selection</div>
+    <h2 class="rise">3 ideas. <span class="hl">1 winner.</span></h2>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr); margin-bottom:34px">
+      <div class="card idea win rise"><span class="badge">CHOSEN</span><div class="icon">🍔</div><h3>UniEats</h3><p>Order food from campus outlets and schedule pickup.</p><p class="verdict" style="color:var(--mint)">Strong fit: a frequent campus problem, and a focused MVP is achievable.</p></div>
+      <div class="card idea rise"><div class="icon">📚</div><h3>UniStudy</h3><p>Find and reserve available study spaces on campus.</p><p class="verdict">Useful, but availability data and room access are hard to integrate.</p></div>
+      <div class="card idea rise"><div class="icon">🚗</div><h3>UniRide</h3><p>Find transport options and coordinate student rides.</p><p class="verdict">Useful, but safety, driver checks and coordination add complexity.</p></div>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 1fr; gap:16px 40px">
+      <div class="check rise">A clear, relatable and time-sensitive student problem</div>
+      <div class="check rise">Easy to explain and to demonstrate</div>
+      <div class="check rise">First version limited to essential ordering and pickup</div>
+      <div class="check rise">Expands to more universities with the same core purpose</div>
+    </div>
+  </section>
+
+  <!-- 7. Operating model -->
+  <section class="slide" data-title="Operating model">
+    <div class="eyebrow rise">Target users &amp; operating model</div>
+    <h2 class="rise">Two sides. <span class="hl">One flow.</span></h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr; margin-bottom:24px">
+      <div class="card rise"><h3>🎓 Student user</h3>
+        <div class="flow"><span>Chooses a university</span><i>→</i><span>Browses outlets</span><i>→</i><span>Adds to cart</span><i>→</i><span>Picks a pickup slot</span><i>→</i><span>Gets confirmation</span></div></div>
+      <div class="card rise"><h3>👨‍🍳 Restaurant user</h3>
+        <div class="flow"><span>Receives new orders</span><i>→</i><span>Confirms or rejects</span><i>→</i><span>Prepares</span><i>→</i><span>Marks ready for pickup</span></div></div>
+    </div>
+    <div class="card rise" style="margin-bottom:24px; display:flex; gap:20px; align-items:center"><div class="icon" style="margin:0; flex:none">🏫</div><p><b style="color:var(--cream)">Multi-university model:</b> every food outlet is linked to one university. Students pick their university first, and the app filters restaurants and menus to match.</p></div>
+    <div class="card warn rise"><div style="font-size:44px">⚠️</div><p><b style="color:var(--mustard)">Key assumption:</b> each restaurant controls its own pickup slots, so the app only shows times the outlet can really prepare and hand over the order.</p></div>
+  </section>
+
+  <!-- 8. MVP features -->
+  <section class="slide" data-title="MVP features">
+    <div class="eyebrow rise">Prioritised features</div>
+    <h2 class="rise" style="margin-bottom:14px">Must-have <span class="hl">MVP</span></h2>
+    <p class="muted rise" style="margin-bottom:28px">The MVP shows the full core journey, from choosing a university to collecting a scheduled order.</p>
+    <div class="grid" style="grid-template-columns:repeat(4,1fr); gap:18px">
+      <div class="card feat rise"><div class="icon">🏫</div><h3>University selection</h3><p>Choose your campus and see its food outlets.</p></div>
+      <div class="card feat rise"><div class="icon">👤</div><h3>Registration / login</h3><p>A basic student account and order history.</p></div>
+      <div class="card feat rise"><div class="icon">🏪</div><h3>Restaurant listings</h3><p>Participating cafés and outlets at your university.</p></div>
+      <div class="card feat rise"><div class="icon">📋</div><h3>Digital menus</h3><p>Available food, descriptions and prices.</p></div>
+      <div class="card feat rise"><div class="icon">🛒</div><h3>Cart &amp; summary</h3><p>Review items and quantities before ordering.</p></div>
+      <div class="card feat rise"><div class="icon">🕒</div><h3>Pickup scheduling</h3><p>Pick from restaurant-approved collection slots.</p></div>
+      <div class="card feat rise"><div class="icon">✅</div><h3>Order confirmation</h3><p>Order number, pickup time and instructions.</p></div>
+      <div class="card feat rise"><div class="icon">👩‍🍳</div><h3>Restaurant order view</h3><p>Staff receive orders and update their status.</p></div>
+    </div>
+  </section>
+
+  <!-- 9. Nice to have + scope -->
+  <section class="slide" data-title="Future features">
+    <div class="eyebrow rise">Future development</div>
+    <h2 class="rise">Nice-to-have, <span class="hl">later.</span></h2>
+    <div class="grid" style="grid-template-columns:1.25fr 1fr; gap:40px; align-items:start">
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:14px">
+        <div class="pill rise"><em>💳</em>Card or wallet payments</div>
+        <div class="pill rise"><em>🔔</em>Live status &amp; push alerts</div>
+        <div class="pill rise"><em>⭐</em>Ratings &amp; reviews</div>
+        <div class="pill rise"><em>❤️</em>Favourites &amp; repeat orders</div>
+        <div class="pill rise"><em>🏷️</em>Discounts, promos &amp; loyalty</div>
+        <div class="pill rise"><em>🥗</em>Dietary &amp; allergen filters</div>
+        <div class="pill rise" style="grid-column:span 2"><em>🔳</em>Pickup QR code so staff can verify orders</div>
+      </div>
+      <div class="card rise" style="border-color:rgba(255,154,60,.4)">
+        <h3 style="margin-bottom:18px">🎯 Scope for the semester</h3>
+        <p style="margin-bottom:16px"><b style="color:var(--mint)">Build now:</b> university selection, restaurant browsing, menu viewing, cart, pickup slot selection and confirmation.</p>
+        <p><b style="color:var(--mustard)">Propose later:</b> advanced payments, loyalty programmes and live tracking.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Screens -->
+  <section class="slide" data-title="Screen designs" style="padding-top:84px">
+    <div class="eyebrow rise">Main screen designs</div>
+    <h2 class="rise" style="font-size:62px; margin-bottom:26px">Five screens, <span class="hl">one smooth order.</span></h2>
+    <div class="phones">
+      <div class="ph rise">
+        <div class="phone"><div class="scr">
+          <div class="hero"><div class="u"><svg viewBox="0 0 600 600" width="30"><path d="M200 170 V330 a100 100 0 0 0 200 0 V170" fill="none" stroke="#FF6B2C" stroke-width="80" stroke-linecap="round"/></svg></div>
+            <h4 style="font-size:20px">Skip the queue.<br>Enjoy your break.</h4></div>
+          <div class="fld">✉️ University email</div>
+          <div class="fld">🔒 Password</div>
+          <p style="color:var(--orange); font-weight:700; margin-top:6px">Create account</p>
+          <div class="btn">Log in</div>
+        </div></div>
+        <p class="cap"><b>1 · Welcome</b>Sign in or sign up</p>
+      </div>
+      <div class="ph rise">
+        <div class="phone"><div class="scr">
+          <h4>Choose your university</h4>
+          <div class="fld">🔍 Search universities</div>
+          <div class="item"><div class="em">🎓</div><b>Arab Open University</b></div>
+          <div class="item sel"><div class="em">🎓</div><b>Cairo University</b><span class="add tick">✓</span></div>
+          <div class="item"><div class="em">🎓</div><b>Ain Shams University</b></div>
+          <div class="item"><div class="em">🎓</div><b>Alexandria University</b></div>
+          <div class="btn">Continue</div>
+        </div></div>
+        <p class="cap"><b>2 · University</b>Filters campus outlets</p>
+      </div>
+      <div class="ph rise">
+        <div class="phone"><div class="scr">
+          <h4>Good afternoon!</h4>
+          <p class="sub">📍 Cairo University</p>
+          <div class="fld">🔍 Search food or restaurants</div>
+          <div class="mini"><span>All</span><span>Coffee</span><span>Meals</span><span>Pizza</span></div>
+          <div class="item"><div class="em">☕</div><div><b>Campus Café</b><small>Coffee · Sandwiches</small></div><span class="add">›</span></div>
+          <div class="item"><div class="em">🍛</div><div><b>The Food Court</b><small>Meals · Snacks</small></div><span class="add">›</span></div>
+          <div class="item"><div class="em">🍕</div><div><b>Pizza Corner</b><small>Pizza · Pasta</small></div><span class="add">›</span></div>
+          <div class="tabs"><b>Home</b><span>Orders</span><span>Profile</span></div>
+        </div></div>
+        <p class="cap"><b>3 · Home</b>Outlets on your campus</p>
+      </div>
+      <div class="ph rise">
+        <div class="phone"><div class="scr">
+          <h4>Campus Café</h4>
+          <p class="sub">Coffee · Sandwiches</p>
+          <div class="item sel"><div class="em">🌯</div><div><b>Chicken wrap</b><small>EGP 95</small></div><span class="add">1</span></div>
+          <div class="item sel"><div class="em">🥪</div><div><b>Cheese sandwich</b><small>EGP 65</small></div><span class="add">1</span></div>
+          <div class="item"><div class="em">🧋</div><div><b>Iced coffee</b><small>EGP 55</small></div><span class="add">+</span></div>
+          <div class="item"><div class="em">🧃</div><div><b>Fresh juice</b><small>EGP 45</small></div><span class="add">+</span></div>
+          <div class="btn">View cart · 2 items</div>
+        </div></div>
+        <p class="cap"><b>4 · Menu &amp; cart</b>Add items, see prices</p>
+      </div>
+      <div class="ph rise">
+        <div class="phone"><div class="scr">
+          <h4>Pickup time</h4>
+          <p class="sub">Select an available time</p>
+          <div class="item"><b>🕒 12:15 PM</b></div>
+          <div class="item sel"><b>🕒 12:30 PM</b><span class="add tick">✓</span></div>
+          <div class="item full"><b>🕒 12:45 PM</b><small style="margin-left:auto">Full</small></div>
+          <div class="item"><b>🕒 1:00 PM</b></div>
+          <p style="font-weight:700; margin-top:10px">Order summary</p>
+          <p class="sub">2 items · EGP 160</p>
+          <div class="btn go">Confirm order</div>
+        </div></div>
+        <p class="cap"><b>5 · Pickup</b>Pick a slot, confirm</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. Journey -->
+  <section class="slide" data-title="User journey">
+    <div class="eyebrow rise">User journey &amp; navigation</div>
+    <h2 class="rise">7 taps to <span class="hl">lunch.</span></h2>
+    <div class="track" style="margin-bottom:40px">
+      <div class="stop rise"><div class="dot">📲</div><b>Open UniEats</b><span>Shows the welcome and login screen.</span></div>
+      <div class="stop rise"><div class="dot">🎓</div><b>Select university</b><span>Loads restaurants linked to it.</span></div>
+      <div class="stop rise"><div class="dot">🏪</div><b>Choose a restaurant</b><span>Shows its menu and availability.</span></div>
+      <div class="stop rise"><div class="dot">🛒</div><b>Add food to cart</b><span>Updates the order summary and total.</span></div>
+      <div class="stop rise"><div class="dot">🕒</div><b>Choose pickup time</b><span>Shows restaurant-approved slots.</span></div>
+      <div class="stop rise"><div class="dot">✅</div><b>Confirm order</b><span>Creates an order number and sends it to the outlet.</span></div>
+      <div class="stop rise"><div class="dot">🛍️</div><b>Collect food</b><span>Student picks up at the outlet.</span></div>
+    </div>
+    <div class="navflow rise" style="margin-bottom:24px">
+      <span>Welcome / Login</span><i>→</i><span>Select University</span><i>→</i><span>Home</span><i>→</i><span>Restaurant</span><i>→</i><span>Menu</span><i>→</i><span>Cart</span><i>→</i><span>Pickup Time</span><i>→</i><span>Confirmation</span><i>→</i><span>Collection</span>
+    </div>
+    <div class="card warn rise" style="padding:18px 26px"><div style="font-size:34px">🔑</div><p style="font-size:20px"><b style="color:var(--mustard)">Key UX rule:</b> the pickup time is always visible before confirming, and full or unavailable slots can't be selected.</p></div>
+  </section>
+
+  <!-- 12. Plan -->
+  <section class="slide" data-title="Development plan">
+    <div class="eyebrow rise">Proposed development plan</div>
+    <h2 class="rise">From idea to <span class="hl">working app</span></h2>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr); gap:20px">
+      <div class="card rise"><div class="stage-n">01</div><h3>Validate</h3><p>Interview students and at least one campus outlet to confirm the queue and pickup problem.</p></div>
+      <div class="card rise"><div class="stage-n">02</div><h3>Design</h3><p>Finalise the user flow, wireframes, screen labels and visual style.</p></div>
+      <div class="card rise"><div class="stage-n">03</div><h3>Build core screens</h3><p>Login, university selection, restaurant list, menu, cart and pickup selection.</p></div>
+      <div class="card rise"><div class="stage-n">04</div><h3>Add order logic</h3><p>Connect the cart, pickup slots, confirmation and the restaurant order view.</p></div>
+      <div class="card rise"><div class="stage-n">05</div><h3>Test</h3><p>Students complete a sample order; record confusion, timing and usability issues.</p></div>
+      <div class="card rise"><div class="stage-n">06</div><h3>Improve</h3><p>Fix issues and prioritise improvements based on feedback.</p></div>
+    </div>
+  </section>
+
+  <!-- 13. Risks -->
+  <section class="slide" data-title="Risks">
+    <div class="eyebrow rise">Risks &amp; considerations</div>
+    <h2 class="rise">What could go wrong, <span class="hl">and our answer</span></h2>
+    <div class="grid" style="gap:14px">
+      <div class="risk rise"><div class="r">Restaurant can't meet the pickup time</div><div class="arrow">→</div><div class="s">Outlets manage capacity and publish their own pickup slots.</div></div>
+      <div class="risk rise"><div class="r">Wrong menu or price information</div><div class="arrow">→</div><div class="s">Staff can update menus and mark items unavailable.</div></div>
+      <div class="risk rise"><div class="r">Student picks the wrong university</div><div class="arrow">→</div><div class="s">Show the selected university clearly and let users change it.</div></div>
+      <div class="risk rise"><div class="r">Late order preparation</div><div class="arrow">→</div><div class="s">Realistic preparation buffers, and outlets update order status.</div></div>
+      <div class="risk rise"><div class="r">Low adoption by restaurants</div><div class="arrow">→</div><div class="s">Start with a small pilot of one or two outlets, then expand.</div></div>
+    </div>
+  </section>
+
+  <!-- 14. Conclusion -->
+  <section class="slide cover" data-title="Conclusion">
+    <div style="flex:1">
+      <div class="eyebrow rise">Conclusion</div>
+      <h2 class="rise" style="font-size:110px">Less waiting.<br><span class="hl">More break.</span></h2>
+      <p class="muted rise" style="margin-bottom:30px; max-width:820px">UniEats is a practical, student-centred answer to long campus queues. Its multi-university structure leaves room to grow, while a focused MVP keeps the first version achievable this semester.</p>
+      <div class="quote rise" style="font-size:27px; max-width:860px">🎯 Success = a student orders, then collects at the chosen time with less waiting and without missing their next lecture.</div>
+    </div>
+    <div class="plate rise" style="width:460px; height:460px">
+      <div class="ring"></div>
+      <div class="ring in"></div>
+      <div style="text-align:center; position:relative">
+        <p style="font:800 76px/1 'Bricolage Grotesque'">Thank<br><span class="hl">you!</span></p>
+        <p class="muted" style="margin-top:14px">Questions? 🍟</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="hint">← → keys · swipe</div>
+  <nav>
+    <button id="prev" aria-label="Previous slide" title="Back (←)">
+      <!-- fork drawn pointing right, then flipped so it points back -->
+      <svg class="fork" viewBox="0 0 120 40" fill="currentColor" aria-hidden="true">
+        <g transform="translate(120 0) scale(-1 1)">
+          <rect x="4" y="17" width="64" height="6" rx="3"/>
+          <path d="M62 16 L80 9 L80 31 L62 24 Z"/>
+          <rect x="78" y="8" width="8" height="24" rx="2"/>
+          <rect x="84" y="8" width="30" height="4" rx="2"/>
+          <rect x="84" y="14.7" width="30" height="4" rx="2"/>
+          <rect x="84" y="21.3" width="30" height="4" rx="2"/>
+          <rect x="84" y="28" width="30" height="4" rx="2"/>
+        </g>
+      </svg>
+    </button>
+    <span class="counter" id="counter"></span>
+    <button id="next" aria-label="Next slide" title="Next (→)">
+      <svg class="spoon" viewBox="0 0 120 40" fill="currentColor" aria-hidden="true">
+        <rect x="4" y="17" width="62" height="6" rx="3"/>
+        <path d="M60 16.5 Q68 15 74 12 L74 28 Q68 25 60 23.5 Z"/>
+        <ellipse cx="94" cy="20" rx="23" ry="14"/>
+      </svg>
+    </button>
+  </nav>
+</div>
+
+<script>
+  const stage = document.getElementById('stage');
+  const slides = [...document.querySelectorAll('.slide')];
+  const prev = document.getElementById('prev');
+  const next = document.getElementById('next');
+  const counter = document.getElementById('counter');
+  const section = document.getElementById('section');
+  const progress = document.getElementById('progress');
+  const [blobA, blobB] = document.querySelectorAll('.blob');
+  const pad = n => String(n).padStart(2, '0');
+  let i = 0;
+
+  // stagger each slide's entrance animations in document order
+  slides.forEach(s => s.querySelectorAll('.rise').forEach((el, k) => el.style.setProperty('--i', k)));
+
+  function go(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => { s.classList.toggle('active', k === i); s.inert = k !== i; });
+    counter.innerHTML = `<b>${pad(i + 1)}</b> / ${pad(slides.length)}`;
+    section.textContent = slides[i].dataset.title;
+    progress.style.width = `${(i + 1) / slides.length * 100}%`;
+    blobA.style.left = `${(i * 37) % 100 * 9 - 200}px`;
+    blobA.style.top = `${(i * 53) % 100 * 4 - 300}px`;
+    blobB.style.left = `${(i * 71 + 50) % 100 * 9}px`;
+    blobB.style.top = `${(i * 29 + 40) % 100 * 4}px`;
+    prev.disabled = i === 0;
+    next.disabled = i === slides.length - 1;
+    history.replaceState(null, '', '#' + (i + 1));
+  }
+
+  function fit() {
+    const s = Math.min(innerWidth / 1640, innerHeight / 940);
+    stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+  }
+
+  prev.onclick = () => go(i - 1);
+  next.onclick = () => go(i + 1);
+  addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(i + 1); }
+    if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(i - 1); }
+    if (e.key === 'Home') go(0);
+    if (e.key === 'End') go(slides.length - 1);
+    if (e.key === 'f') document.documentElement.requestFullscreen?.();
+  });
+  let x0 = null;
+  addEventListener('touchstart', e => x0 = e.touches[0].clientX, { passive: true });
+  addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) go(i + (dx < 0 ? 1 : -1));
+    x0 = null;
+  });
+  addEventListener('resize', fit);
+
+  fit();
+  go((parseInt(location.hash.slice(1)) || 1) - 1);
+</script>
+</body>
+</html>
