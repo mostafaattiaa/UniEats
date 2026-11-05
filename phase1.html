@@ -247,6 +247,10 @@
   .board .li { display: flex; gap: 14px; align-items: center; font-size: 22px; padding: 9px 0; border-bottom: 1px dashed var(--line); }
   .board .li:last-child { border-bottom: 0; }
   .board .li em { font-style: normal; font-size: 24px; width: 32px; }
+  .team { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+  .member { background: var(--card); border: 1px solid var(--line); border-radius: 26px; padding: 12px 12px 18px; text-align: center; }
+  .member img { width: 100%; display: block; border-radius: 18px; aspect-ratio: 4 / 5; object-fit: cover; box-shadow: 0 14px 30px rgba(0, 0, 0, .45); }
+  .member figcaption { margin-top: 14px; font: 700 21px/1.15 "Bricolage Grotesque", sans-serif; color: var(--cream); }
   .pill.idea { position: relative; }
   .vid { display: block; height: 590px; width: 332px; border-radius: 28px; background: #000; border: 6px solid rgba(255, 243, 230, .1); box-shadow: 0 30px 70px rgba(0, 0, 0, .55), 0 0 60px rgba(255, 107, 44, .2); }
   table.mx { width: 100%; border-collapse: separate; border-spacing: 0 10px; font-size: 20px; }
@@ -294,6 +298,20 @@
         <rect width="600" height="600" rx="140" fill="url(#lg)"/>
         <path d="M200 170 V330 a100 100 0 0 0 200 0 V170" fill="none" stroke="#fff" stroke-width="66" stroke-linecap="round"/>
       </svg>
+    </div>
+  </section>
+
+  <!-- 1b. Team -->
+  <section class="slide" data-title="Meet the team">
+    <div class="eyebrow rise">Introduction · the team</div>
+    <h2 class="rise" style="margin-bottom:26px">Meet <span class="hl">Team 4</span></h2>
+    <div class="team">
+      <figure class="member rise"><img src="images/team-rital.png" alt="Rital Edam"><figcaption>Rital Edam</figcaption></figure>
+      <figure class="member rise"><img src="images/team-esraa.png" alt="Esraa Ahmed"><figcaption>Esraa Ahmed</figcaption></figure>
+      <figure class="member rise"><img src="images/team-abdelrahman.png" alt="Abdelrahman Dahiss"><figcaption>Abdelrahman Dahiss</figcaption></figure>
+      <figure class="member rise"><img src="images/team-hamza.png" alt="Hamza Kandil"><figcaption>Hamza Kandil</figcaption></figure>
+      <figure class="member rise"><img src="images/team-begad.png" alt="Begad Ahmed"><figcaption>Begad Ahmed</figcaption></figure>
+      <figure class="member rise"><img src="images/team-mostafa.png" alt="Mustafa Attia"><figcaption>Mustafa Attia</figcaption></figure>
     </div>
   </section>
 

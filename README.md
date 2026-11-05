@@ -8,19 +8,20 @@ A multi-university food ordering and scheduled pickup app. Students choose their
 
 | | Web (live) | PowerPoint |
 |---|---|---|
-| **Phase 1 team presentation** (10 slides) | https://unieats-six.vercel.app/phase1.html | [UniEats_Phase1.pptx](UniEats_Phase1.pptx) |
+| **Phase 1 team presentation** (11 slides) | https://unieats-six.vercel.app/phase1.html | [UniEats_Phase1.pptx](UniEats_Phase1.pptx) |
 | **Week 6 project proposal** (14 slides) | https://unieats-six.vercel.app | [UniEats_Week6.pptx](UniEats_Week6.pptx) |
 
 The web presentations run in any browser. Use the **spoon** button (or →) for the next slide, the **fork** button (or ←) to go back, and **F** for full screen. Each PowerPoint has the same slides as its web version, with speaker notes on every slide.
 
 ## Phase 1 contents
 
-1. Customer and problem
-2. Customer survey (video)
-3. 3 app ideas, the gap comparison and the decision matrix
-4. App design idea
-5. How the app works
-6. Must-have and nice-to-have features
+1. Meet Team 4
+2. Customer and problem
+3. Customer survey (video)
+4. 3 app ideas, the gap comparison and the decision matrix
+5. App design idea (4 screens)
+6. How the app works
+7. Must-have and nice-to-have features
 
 ## Week 6 proposal contents
 
