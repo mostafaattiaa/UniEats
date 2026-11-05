@@ -248,6 +248,18 @@
   .board .li:last-child { border-bottom: 0; }
   .board .li em { font-style: normal; font-size: 24px; width: 32px; }
   .pill.idea { position: relative; }
+  .vid { display: block; height: 590px; width: 332px; border-radius: 28px; background: #000; border: 6px solid rgba(255, 243, 230, .1); box-shadow: 0 30px 70px rgba(0, 0, 0, .55), 0 0 60px rgba(255, 107, 44, .2); }
+  table.mx { width: 100%; border-collapse: separate; border-spacing: 0 10px; font-size: 20px; }
+  .mx th { text-align: left; padding: 6px 20px; font: 700 15px "DM Sans"; letter-spacing: .12em; text-transform: uppercase; color: var(--orange-2); }
+  .mx td { padding: 16px 20px; background: var(--card); color: var(--muted); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); line-height: 1.35; }
+  .mx td:first-child { color: var(--cream); font-weight: 700; border-left: 1px solid var(--line); border-radius: 16px 0 0 16px; }
+  .mx td:last-child { border-right: 1px solid var(--line); border-radius: 0 16px 16px 0; }
+  .mx tr.win td { background: rgba(255, 107, 44, .16); border-color: rgba(255, 154, 60, .5); color: var(--cream); }
+  .mx.sc th:not(:first-child), .mx.sc td:not(:first-child) { text-align: center; }
+  .mx.sc td { padding: 12px 14px; font-size: 22px; }
+  .mx.sc th.w, .mx.sc td.w { color: var(--cream); background: rgba(255, 107, 44, .16); font-weight: 700; }
+  .mx.sc tr.tot td { font: 700 24px "Bricolage Grotesque"; color: var(--cream); }
+  .mx.sc tr.tot td.w { color: var(--mustard); }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
@@ -320,6 +332,63 @@
         </div>
       </div>
       <img class="photo rise" src="images/ideas.jpg" alt="The three ideas: Uni Eats, Study Spot and Campus Connect, with Uni Eats chosen">
+    </div>
+  </section>
+
+  <!-- 3b. Customer interviews (video) -->
+  <section class="slide" data-title="Customer survey">
+    <div class="row" style="gap:70px">
+      <div class="rise" style="flex:none">
+        <video class="vid" controls preload="metadata" playsinline poster="images/interviews-poster.jpg" src="images/interviews.mp4"></video>
+      </div>
+      <div style="flex:1">
+        <div class="eyebrow rise">Customer survey</div>
+        <h2 class="rise" style="font-size:66px">We asked <span class="hl">real people.</span></h2>
+        <div class="grid" style="gap:14px; margin-bottom:22px">
+          <div class="pill rise"><em>🎤</em>Video survey: street interviews filmed by Team 4</div>
+          <div class="pill rise"><em>⏳</em>Is waiting in a food queue a real problem?</div>
+          <div class="pill rise"><em>📱</em>Would they order ahead and pick a time?</div>
+        </div>
+        <p class="muted rise" style="font-size:20px">▶ Press play to watch the interviews (1 min 24 s).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3c. Gap comparison -->
+  <section class="slide" data-title="Where is the gap?">
+    <div class="eyebrow rise">Comparison matrix</div>
+    <h2 class="rise" style="font-size:62px">Where is the <span class="hl">gap?</span></h2>
+    <table class="mx rise">
+      <thead><tr><th>App idea</th><th>Existing solutions</th><th>What is missing (the gap)</th><th>How our app fills the gap</th></tr></thead>
+      <tbody>
+        <tr class="win"><td>🍔 Uni Eats</td><td>University cafeterias and food outlets</td><td>Students waste time waiting in long queues and may be late to lectures.</td><td>Allows students to order ahead and choose a pickup time.</td></tr>
+        <tr><td>📚 Study Spot</td><td>Libraries and study-space booking systems</td><td>Students may not know which study areas have available spaces.</td><td>Shows available study spaces around campus.</td></tr>
+        <tr><td>📅 Campus Connect</td><td>University websites and social media pages</td><td>University events and announcements are spread across different platforms.</td><td>Puts campus events and announcements in one place.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 3d. Decision matrix -->
+  <section class="slide" data-title="Why Uni Eats">
+    <div class="eyebrow rise">Decision matrix</div>
+    <h2 class="rise" style="font-size:62px">Why Uni Eats <span class="hl">won</span></h2>
+    <div class="row" style="align-items:flex-start; gap:44px">
+      <table class="mx sc rise" style="flex:1.25">
+        <thead><tr><th>Criterion</th><th>Weight</th><th class="w">Uni Eats</th><th>Study Spot</th><th>Campus Connect</th></tr></thead>
+        <tbody>
+          <tr><td>User need</td><td>30%</td><td class="w">5</td><td>4</td><td>3</td></tr>
+          <tr><td>Feasibility</td><td>25%</td><td class="w">4</td><td>5</td><td>5</td></tr>
+          <tr><td>Gap left</td><td>20%</td><td class="w">5</td><td>3</td><td>3</td></tr>
+          <tr><td>Mobile fit</td><td>15%</td><td class="w">5</td><td>5</td><td>4</td></tr>
+          <tr><td>Risk (5 = low)</td><td>10%</td><td class="w">4</td><td>5</td><td>5</td></tr>
+          <tr class="tot"><td>Weighted total</td><td>100%</td><td class="w">4.65 / 5</td><td>4.30 / 5</td><td>3.85 / 5</td></tr>
+        </tbody>
+      </table>
+      <div style="flex:1" class="grid">
+        <div class="card rise" style="border-color:rgba(255,154,60,.5)"><h3>🏆 Highest score</h3><p class="muted" style="font-size:20px">Uni Eats solves a common problem for university students: wasting time waiting in food queues.</p></div>
+        <div class="card rise"><p class="muted" style="font-size:20px">Students order food in advance and schedule pickup times, and the idea can work across multiple universities.</p></div>
+        <p class="muted rise" style="font-size:15px">Weighted total = Σ (score × weight) across the five criteria.</p>
+      </div>
     </div>
   </section>
 
